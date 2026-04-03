@@ -15,6 +15,11 @@ class Settings:
     openai_api_key: str | None
     internal_api_token: str | None
     storage_root: str
+    database_url: str | None
+    supabase_service_role_key: str | None
+    retention_artifact_days: int
+    retention_failed_job_days: int
+    retention_audit_days: int
 
     @property
     def has_openai_key(self) -> bool:
@@ -27,6 +32,11 @@ def get_settings() -> Settings:
         openai_api_key=os.getenv("OPENAI_API_KEY"),
         internal_api_token=os.getenv("APP_INTERNAL_API_TOKEN"),
         storage_root=os.getenv("APP_STORAGE_ROOT", str(API_ROOT / "data")),
+        database_url=os.getenv("DATABASE_URL"),
+        supabase_service_role_key=os.getenv("SUPABASE_SERVICE_ROLE_KEY"),
+        retention_artifact_days=int(os.getenv("RETENTION_ARTIFACT_DAYS", "180")),
+        retention_failed_job_days=int(os.getenv("RETENTION_FAILED_JOB_DAYS", "30")),
+        retention_audit_days=int(os.getenv("RETENTION_AUDIT_DAYS", "365")),
     )
 
 

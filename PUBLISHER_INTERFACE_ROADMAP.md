@@ -4,8 +4,8 @@ Ziel: Ein internes Verlagsinterface mit Login, das die drei bestehenden Tools fu
 
 ## Fortschritt
 
-- Status: `Phase 0 abgeschlossen`, `Phase 1 fortgeschritten`, `Phase 2 gestartet`
-- Aktueller Fokus: Phase 2, leichtes Job-Tracking und asynchrone API-Ausfuehrung
+- Status: `Phase 0 abgeschlossen`, `Phase 1 abgeschlossen`, `Phase 2 abgeschlossen`, `Phase 3 abgeschlossen`
+- Aktueller Fokus: Phase 3, Datenmodell und Infrastruktur
 - Erledigt in Phase 1: gemeinsames API/Core-Grundgeruest mit `files`, `chunking`, `retry`, `schemas`, Tool-Katalog
 - Erledigt in Phase 1: Service-Adapter fuer `translation`, `bibliography`, `proofcheck` plus einheitlicher API-Run-Endpoint
 - Erledigt in Phase 1: Option-Validierung pro Tool, sichere Fehlerpfade (`status=failed`) und Logging im Runner/API
@@ -15,6 +15,11 @@ Ziel: Ein internes Verlagsinterface mit Login, das die drei bestehenden Tools fu
 - Erledigt in Phase 2: projektgebundene Datei-/Artifact-Downloads und Smoke-Test-Skript fuer End-to-End-Checks
 - Erledigt in Phase 2: standardisierte API-Fehlerantworten (globales Error-Format fuer Validation/HTTP/Unhandled Exceptions)
 - Erledigt in Phase 2: End-to-End Smoke-Test erfolgreich (`Projekt -> Upload -> Job -> Polling -> Ergebnis`)
+- Erledigt in Phase 3: v1 Datenmodell spezifiziert (Entities, Beziehungen, Storage-Konventionen, Retention-Regeln)
+- Erledigt in Phase 3: initiales Postgres-Schema als SQL-Migration angelegt (`services/api/sql/001_initial_schema.sql`)
+- Erledigt in Phase 3: API-Manager DB-first gemacht (Projekte/Dateien/Jobs in Postgres, mit Fallback)
+- Erledigt in Phase 3: Audit-Events in zentrale Flows integriert (`project.created`, `file.uploaded`, `job.queued`, `job.finished`)
+- Erledigt in Phase 3: Retention/Cleanup-Skript implementiert (`tools.retention_cleanup`)
 
 ## Produktziel
 

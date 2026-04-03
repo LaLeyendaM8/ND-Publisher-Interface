@@ -1,6 +1,7 @@
 from app.core.auth import require_internal_token
 from app.core.chunking import chunk_pages, slice_pages, split_text_with_page_hints, truncate_text_if_needed
 from app.core.config import Settings, get_settings, require_openai_api_key
+from app.core.db import db_conn, has_database, require_database_url
 from app.core.files import ensure_dir, load_text_any, read_docx, read_pdf_pages, read_pdf_with_markers, read_txt
 from app.core.responses import error_response
 from app.core.retry import call_with_retries
@@ -18,16 +19,19 @@ __all__ = [
     "TOOL_CATALOG",
     "call_with_retries",
     "chunk_pages",
+    "db_conn",
     "ensure_dir",
     "error_response",
     "get_settings",
     "get_tool_by_id",
+    "has_database",
     "load_text_any",
     "read_docx",
     "read_pdf_pages",
     "read_pdf_with_markers",
     "read_txt",
     "require_internal_token",
+    "require_database_url",
     "require_openai_api_key",
     "slice_pages",
     "split_text_with_page_hints",

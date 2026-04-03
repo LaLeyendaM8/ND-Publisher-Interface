@@ -54,3 +54,10 @@ Notes:
 - If `APP_INTERNAL_API_TOKEN` is set, send header `X-Internal-Token: <token>` on protected endpoints.
 - API errors are standardized as:
   - `{ "ok": false, "error": { "code": "...", "message": "...", "details": ... } }`
+
+## Phase 3 schema
+
+- Initial SQL schema: `services/api/sql/001_initial_schema.sql`
+- Schema notes: `docs/architecture/PHASE3_DATA_MODEL.md`
+- Run migrations: `python -m tools.run_migrations`
+- Run retention cleanup: `python -m tools.retention_cleanup`
