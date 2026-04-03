@@ -4,9 +4,17 @@ Ziel: Ein internes Verlagsinterface mit Login, das die drei bestehenden Tools fu
 
 ## Fortschritt
 
-- Status: `Phase 0 abgeschlossen`, `Phase 1 gestartet`
-- Aktueller Fokus: Phase 1, gemeinsame Python-Grundmodule fuer die drei Tools
+- Status: `Phase 0 abgeschlossen`, `Phase 1 fortgeschritten`, `Phase 2 gestartet`
+- Aktueller Fokus: Phase 2, leichtes Job-Tracking und asynchrone API-Ausfuehrung
 - Erledigt in Phase 1: gemeinsames API/Core-Grundgeruest mit `files`, `chunking`, `retry`, `schemas`, Tool-Katalog
+- Erledigt in Phase 1: Service-Adapter fuer `translation`, `bibliography`, `proofcheck` plus einheitlicher API-Run-Endpoint
+- Erledigt in Phase 1: Option-Validierung pro Tool, sichere Fehlerpfade (`status=failed`) und Logging im Runner/API
+- Erledigt im Phase-1->2 Uebergang: In-Memory Job-Store, `job_id`, Status-Lifecycle und asynchrone Job-Endpoints
+- Erledigt in Phase 2: Projekt-Endpoints, Datei-Upload, Job-Start pro Projekt, Artifact-Download und Token-basierte Request-Protection (vorbereitet)
+- Erledigt in Phase 2: projektgebundene Job-Abfragen (`/projects/{id}/jobs`, `/projects/{id}/jobs/{job_id}`)
+- Erledigt in Phase 2: projektgebundene Datei-/Artifact-Downloads und Smoke-Test-Skript fuer End-to-End-Checks
+- Erledigt in Phase 2: standardisierte API-Fehlerantworten (globales Error-Format fuer Validation/HTTP/Unhandled Exceptions)
+- Erledigt in Phase 2: End-to-End Smoke-Test erfolgreich (`Projekt -> Upload -> Job -> Polling -> Ergebnis`)
 
 ## Produktziel
 

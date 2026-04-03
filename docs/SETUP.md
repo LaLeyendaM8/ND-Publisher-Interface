@@ -48,9 +48,24 @@ Copy-Item .env.example .env
 ```
 
 Then set `OPENAI_API_KEY` in `services/api/.env`.
+Optional: set `APP_INTERNAL_API_TOKEN` to protect mutating endpoints.
 
 ## Verification
 
 - Web: `http://localhost:3000`
 - API health: `http://localhost:8000/health`
 - API tools: `http://localhost:8000/tools`
+
+## API smoke test (Phase 2)
+
+With API running:
+
+```powershell
+.\scripts\phase2_smoke_test.ps1
+```
+
+If `APP_INTERNAL_API_TOKEN` is set:
+
+```powershell
+.\scripts\phase2_smoke_test.ps1 -Token "your-token"
+```

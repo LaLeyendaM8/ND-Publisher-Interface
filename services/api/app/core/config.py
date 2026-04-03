@@ -13,6 +13,8 @@ load_dotenv(API_ROOT / ".env", override=False)
 class Settings:
     app_env: str
     openai_api_key: str | None
+    internal_api_token: str | None
+    storage_root: str
 
     @property
     def has_openai_key(self) -> bool:
@@ -23,6 +25,8 @@ def get_settings() -> Settings:
     return Settings(
         app_env=os.getenv("APP_ENV", "development"),
         openai_api_key=os.getenv("OPENAI_API_KEY"),
+        internal_api_token=os.getenv("APP_INTERNAL_API_TOKEN"),
+        storage_root=os.getenv("APP_STORAGE_ROOT", str(API_ROOT / "data")),
     )
 
 
