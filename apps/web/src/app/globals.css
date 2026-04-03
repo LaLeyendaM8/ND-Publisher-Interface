@@ -1,26 +1,129 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f5f1eb;
+  --foreground: #171411;
+
+  --color-background: #f5f1eb;
+  --color-surface: #ece5dc;
+  --color-card: #f8f4ee;
+  --color-text: #171411;
+  --color-text-secondary: #6f675f;
+  --color-border: #d8cfc4;
+  --color-accent: #111111;
+  --color-accent-soft: #2a2520;
+  --shadow-soft: 0 10px 30px rgba(23, 20, 17, 0.08);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-background-theme: var(--background);
+  --color-foreground-theme: var(--foreground);
+  --font-sans: var(--font-inter);
+  --font-serif: var(--font-cormorant);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #151311;
+    --foreground: #f3eee7;
+
+    --color-background: #151311;
+    --color-surface: #1d1a17;
+    --color-card: #24211d;
+    --color-text: #f3eee7;
+    --color-text-secondary: #b4aca2;
+    --color-border: #3a342d;
+    --color-accent: #f3eee7;
+    --color-accent-soft: #d5cabc;
+    --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.45);
   }
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-background);
+  color: var(--color-text);
+  font-family: var(--font-inter), sans-serif;
+}
+
+.serif-heading {
+  font-family: var(--font-cormorant), serif;
+}
+
+.nd-card {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-soft);
+}
+
+.nd-input {
+  width: 100%;
+  border-radius: 0.75rem;
+  border: 1px solid var(--color-border);
+  background: var(--color-background);
+  color: var(--color-text);
+  padding: 0.625rem 0.75rem;
+}
+
+.nd-button {
+  border-radius: 9999px;
+  background: var(--color-accent);
+  color: var(--color-background);
+  font-weight: 600;
+  padding: 0.625rem 1rem;
+  transition: transform 120ms ease, opacity 120ms ease;
+}
+
+.nd-button:hover {
+  transform: translateY(-1px);
+  opacity: 0.95;
+}
+
+.nd-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.nd-nav-link {
+  display: block;
+  border: 1px solid var(--color-border);
+  border-radius: 0.75rem;
+  background: var(--color-background);
+  color: var(--color-text);
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+}
+
+.nd-nav-link:hover {
+  background: var(--color-surface);
+}
+
+.nd-nav-link.is-active {
+  border-color: var(--color-accent);
+  background: var(--color-surface);
+  font-weight: 600;
+}
+
+.nd-status {
+  border-radius: 9999px;
+  border: 1px solid var(--color-border);
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  padding: 0.125rem 0.5rem;
+  text-transform: uppercase;
+}
+
+.nd-status-queued {
+  background: color-mix(in oklab, var(--color-card) 85%, #9d8872 15%);
+}
+
+.nd-status-running {
+  background: color-mix(in oklab, var(--color-card) 82%, #7a6f5e 18%);
+}
+
+.nd-status-done {
+  background: color-mix(in oklab, var(--color-card) 82%, #5a7f63 18%);
+}
+
+.nd-status-failed {
+  background: color-mix(in oklab, var(--color-card) 82%, #9b5d5d 18%);
 }

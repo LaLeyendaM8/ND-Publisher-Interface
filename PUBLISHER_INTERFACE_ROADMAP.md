@@ -4,8 +4,8 @@ Ziel: Ein internes Verlagsinterface mit Login, das die drei bestehenden Tools fu
 
 ## Fortschritt
 
-- Status: `Phase 0 abgeschlossen`, `Phase 1 abgeschlossen`, `Phase 2 abgeschlossen`, `Phase 3 abgeschlossen`
-- Aktueller Fokus: Phase 3, Datenmodell und Infrastruktur
+- Status: `Phase 0 abgeschlossen`, `Phase 1 abgeschlossen`, `Phase 2 abgeschlossen`, `Phase 3 abgeschlossen`, `Phase 4 gestartet`
+- Aktueller Fokus: Phase 4, Next.js-Verlagsinterface v1
 - Erledigt in Phase 1: gemeinsames API/Core-Grundgeruest mit `files`, `chunking`, `retry`, `schemas`, Tool-Katalog
 - Erledigt in Phase 1: Service-Adapter fuer `translation`, `bibliography`, `proofcheck` plus einheitlicher API-Run-Endpoint
 - Erledigt in Phase 1: Option-Validierung pro Tool, sichere Fehlerpfade (`status=failed`) und Logging im Runner/API
@@ -20,6 +20,9 @@ Ziel: Ein internes Verlagsinterface mit Login, das die drei bestehenden Tools fu
 - Erledigt in Phase 3: API-Manager DB-first gemacht (Projekte/Dateien/Jobs in Postgres, mit Fallback)
 - Erledigt in Phase 3: Audit-Events in zentrale Flows integriert (`project.created`, `file.uploaded`, `job.queued`, `job.finished`)
 - Erledigt in Phase 3: Retention/Cleanup-Skript implementiert (`tools.retention_cleanup`)
+- Erledigt in Phase 4: ND-inspiriertes UI-Theme im Web-Frontend (Farben, Typografie, Karten-/Form-Komponenten)
+- Erledigt in Phase 4: geschuetzte App-Shell mit Login-Flow (interner Passwortzugang), Navigation und Logout
+- Erledigt in Phase 4: Projekt-Workspace als operative Ansicht (Projekt anlegen, Upload, Jobstart, Status/Artifacts)
 
 ## Produktziel
 
