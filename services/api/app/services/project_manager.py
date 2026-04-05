@@ -94,13 +94,13 @@ def _ensure_default_workspace_context() -> tuple[str, str]:
 
             cur.execute(
                 """
-                INSERT INTO users (email, display_name)
-                VALUES (%s, %s)
-                ON CONFLICT (email)
-                DO UPDATE SET display_name = EXCLUDED.display_name
+                INSERT INTO users (auth_user_id, email, display_name)
+                VALUES (%s, %s, %s)
+                ON CONFLICT (auth_user_id)
+                DO UPDATE SET email = EXCLUDED.email, display_name = EXCLUDED.display_name
                 RETURNING id
                 """,
-                ("system@negative-dialektik.local", "ND System"),
+                ("00000000-0000-0000-0000-000000000001", "system@negative-dialektik.local", "ND System"),
             )
             user_id = str(cur.fetchone()["id"])
 
@@ -120,11 +120,11 @@ def _ensure_default_workspace_context() -> tuple[str, str]:
             else:
                 cur.execute(
                     """
-                    INSERT INTO workspaces (organization_id, name, slug)
-                    VALUES (%s, %s, %s)
+                    INSERT INTO workspaces (organization_id, name, slug, owner_user_id)
+                    VALUES (%s, %s, %s, %s)
                     RETURNING id
                     """,
-                    (org_id, "Main Workspace", "main"),
+                    (org_id, "Main Workspace", "main", user_id),
                 )
                 workspace_id = str(cur.fetchone()["id"])
 

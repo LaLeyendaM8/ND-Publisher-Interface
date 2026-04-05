@@ -57,6 +57,7 @@ Notes:
   - `X-User-Email`
   - `X-User-Role` (`admin|editor|viewer`)
 - `AUTH_AUTO_PROVISION_USERS=true` auto-creates workspace membership for new actor users.
+- User role is stored in `workspace_members.role` (workspace-scoped), not in `users`.
 - API errors are standardized as:
   - `{ "ok": false, "error": { "code": "...", "message": "...", "details": ... } }`
 

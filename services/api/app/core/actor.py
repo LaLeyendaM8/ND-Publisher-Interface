@@ -99,7 +99,7 @@ def require_actor(
         )
 
     workspace_id = _ensure_main_workspace()
-    user_id = x_user_id or "00000000-0000-0000-0000-000000000001"
+    auth_user_id = x_user_id or "00000000-0000-0000-0000-000000000001"
     email = (x_user_email or "system@negative-dialektik.local").strip().lower()
     requested_role = _normalize_role(x_user_role if x_user_id else "admin")
     requested_workspace_role = _app_role_to_workspace_role(requested_role)
@@ -108,15 +108,16 @@ def require_actor(
         with conn.cursor() as cur:
             cur.execute(
                 """
-                INSERT INTO users (id, email, display_name)
+                INSERT INTO users (auth_user_id, email, display_name)
                 VALUES (%s, %s, %s)
-                ON CONFLICT (id)
-                DO UPDATE SET email = EXCLUDED.email
+                ON CONFLICT (auth_user_id)
+                DO UPDATE SET email = EXCLUDED.email, display_name = EXCLUDED.display_name
                 RETURNING id
                 """,
-                (user_id, email, email.split("@")[0]),
+                (auth_user_id, email, email.split("@")[0]),
             )
-            cur.fetchone()
+            row = cur.fetchone()
+            user_id = str(row["id"])
 
             cur.execute(
                 """
@@ -143,6 +144,16 @@ def require_actor(
                 effective_workspace_role = requested_workspace_role
             else:
                 effective_workspace_role = str(member["role"])
+
+            if effective_workspace_role == "owner":
+                cur.execute(
+                    """
+                    UPDATE workspaces
+                    SET owner_user_id = COALESCE(owner_user_id, %s)
+                    WHERE id = %s
+                    """,
+                    (user_id, workspace_id),
+                )
 
     return RequestActor(
         user_id=user_id,

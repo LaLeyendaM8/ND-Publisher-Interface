@@ -13,7 +13,7 @@ This document defines the first persistent data model for ND Publisher Interface
 
 - `organizations`: publisher organizations (tenant root).
 - `workspaces`: operational space inside an organization.
-- `users`: user accounts.
+- `users`: app user accounts linked to Supabase auth via `auth_user_id`.
 - `workspace_members`: user membership and role in workspace.
 - `projects`: work containers for uploaded files and runs.
 - `files`: uploaded source files and metadata.
@@ -25,12 +25,14 @@ This document defines the first persistent data model for ND Publisher Interface
 ## Relationship map
 
 - One organization has many workspaces.
+- One workspace optionally stores `owner_user_id` for explicit ownership anchor.
 - One workspace has many projects.
 - One project has many files.
 - One project has many jobs.
 - One job has many artifacts.
 - One workspace has many glossary records.
 - Users connect to workspaces through `workspace_members`.
+- Effective permissions come from `workspace_members.role` (not from a role column on `users`).
 
 ## Roles (v1)
 
