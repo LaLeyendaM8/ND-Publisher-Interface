@@ -13,17 +13,19 @@ Roadmap:
 Setup:
 
 - [docs/SETUP.md](./docs/SETUP.md)
+- [docs/DEPLOYMENT_PHASE6.md](./docs/DEPLOYMENT_PHASE6.md)
 
 ## Phase status
 
-Current: Phase 1 bootstrap started.
+Current: Phase 6 deployment preparation.
 
 Completed in this workspace:
 
 - New project root and folder structure
-- Next.js app scaffold in `apps/web`
-- FastAPI scaffold in `services/api`
-- Basic docs and root workspace config
+- Next.js ND-style app with Supabase login, protected routes, and project workflow
+- FastAPI backend with DB-backed projects/files/jobs and role-aware access checks
+- Supabase-aligned data model and migrations in `services/api/sql`
+- API docker baseline and deployment docs for live rollout
 
 ## Quick start
 

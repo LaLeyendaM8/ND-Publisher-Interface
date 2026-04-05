@@ -4,8 +4,8 @@ Ziel: Ein internes Verlagsinterface mit Login, das die drei bestehenden Tools fu
 
 ## Fortschritt
 
-- Status: `Phase 0 abgeschlossen`, `Phase 1 abgeschlossen`, `Phase 2 abgeschlossen`, `Phase 3 abgeschlossen`, `Phase 4 abgeschlossen`, `Phase 5 gestartet`
-- Aktueller Fokus: Phase 5, Auth, Rollen und interne Freigabe
+- Status: `Phase 0 abgeschlossen`, `Phase 1 abgeschlossen`, `Phase 2 abgeschlossen`, `Phase 3 abgeschlossen`, `Phase 4 abgeschlossen`, `Phase 5 abgeschlossen`, `Phase 6 gestartet`
+- Aktueller Fokus: Phase 6, Deployment und Livegang
 - Erledigt in Phase 1: gemeinsames API/Core-Grundgeruest mit `files`, `chunking`, `retry`, `schemas`, Tool-Katalog
 - Erledigt in Phase 1: Service-Adapter fuer `translation`, `bibliography`, `proofcheck` plus einheitlicher API-Run-Endpoint
 - Erledigt in Phase 1: Option-Validierung pro Tool, sichere Fehlerpfade (`status=failed`) und Logging im Runner/API
@@ -25,6 +25,10 @@ Ziel: Ein internes Verlagsinterface mit Login, das die drei bestehenden Tools fu
 - Erledigt in Phase 4: Projekt-Workspace als operative Ansicht (Projekt anlegen, Upload, Jobstart, Status/Artifacts)
 - Erledigt in Phase 5: Auth-Provider auf Supabase Auth umgestellt (Email/Passwort, Session-Cookies)
 - Erledigt in Phase 5: Rollenmodell im Frontend aktiv (`admin`, `editor`, `viewer`) inkl. write-Guard fuer API-Proxy
+- Erledigt in Phase 5: Workspace-Membership serverseitig erzwungen (DB-scoped access checks in Project-Endpoints)
+- Erledigt in Phase 5: Auth-Schema an Supabase angepasst (`users.auth_user_id`, `workspaces.owner_user_id`)
+- Erledigt in Phase 6: API-Dockerisierung vorbereitet (`services/api/Dockerfile`, `.dockerignore`)
+- Erledigt in Phase 6: Deployment-Playbook und Production-Env-Templates angelegt
 
 ## Produktziel
 

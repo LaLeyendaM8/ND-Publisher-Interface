@@ -14,6 +14,14 @@ Copy-Item .env.example .env
 Set `OPENAI_API_KEY` in `services/api/.env`.
 Optional for protected endpoints: set `APP_INTERNAL_API_TOKEN`.
 
+## Docker run (deployment baseline)
+
+```powershell
+cd services/api
+docker build -t nd-publisher-api .
+docker run --rm -p 8000:8000 --env-file .env nd-publisher-api
+```
+
 ## Endpoints
 
 - `GET /health`
@@ -58,6 +66,7 @@ Notes:
   - `X-User-Role` (`admin|editor|viewer`)
 - `AUTH_AUTO_PROVISION_USERS=true` auto-creates workspace membership for new actor users.
 - User role is stored in `workspace_members.role` (workspace-scoped), not in `users`.
+- `/health` includes DB status (`database: ok|error|disabled`) for monitoring checks.
 - API errors are standardized as:
   - `{ "ok": false, "error": { "code": "...", "message": "...", "details": ... } }`
 

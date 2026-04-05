@@ -56,6 +56,12 @@ Optional: set `APP_INTERNAL_API_TOKEN` to protect mutating endpoints.
 - API health: `http://localhost:8000/health`
 - API tools: `http://localhost:8000/tools`
 
+## Deployment prep
+
+- Web production env template: `apps/web/.env.production.example`
+- API production env template: `services/api/.env.production.example`
+- Full rollout guide: `docs/DEPLOYMENT_PHASE6.md`
+
 ## API smoke test (Phase 2)
 
 With API running:
