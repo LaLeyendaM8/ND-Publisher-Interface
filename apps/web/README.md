@@ -9,8 +9,8 @@ Next.js frontend fuer das interne Verlagsinterface.
 ```env
 PUBLISHER_API_URL=http://127.0.0.1:8000
 PUBLISHER_API_TOKEN=your-internal-api-token
-APP_LOGIN_PASSWORD=your-internal-password
-APP_SESSION_SECRET=change-this-to-a-long-random-secret
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
 ```
 
 2. Development starten:
@@ -24,9 +24,10 @@ npm run dev
 ## Phase-4 Scope
 
 - ND-inspiriertes App-Design (Farben/Typografie)
-- interner Login + geschuetzte App-Routen
+- Supabase Login + geschuetzte App-Routen
 - Navigation: Dashboard, Projekte, Tools, Dateien, Glossare, Einstellungen
 - operative Projektansicht fuer Upload, Jobstart, Jobstatus und Artifact-Downloads
+- Rollen in v1: `admin`/`editor` (write) und `viewer` (read-only)
 
 ## Quality Checks
 

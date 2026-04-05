@@ -5,13 +5,14 @@ import { useRouter } from "next/navigation";
 
 export function LoginForm() {
   const router = useRouter();
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [message, setMessage] = useState("Interner Zugang fuer ND Publisher Interface");
+  const [message, setMessage] = useState("Bitte mit Supabase-Benutzer anmelden.");
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!password.trim()) return;
+    if (!email.trim() || !password.trim()) return;
     setIsLoading(true);
     setMessage("Pruefe Login...");
 
@@ -19,7 +20,7 @@ export function LoginForm() {
       const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password }),
+        body: JSON.stringify({ email, password }),
       });
 
       if (!response.ok) {
@@ -39,6 +40,17 @@ export function LoginForm() {
 
   return (
     <form className="mt-6 space-y-3" onSubmit={onSubmit}>
+      <label className="text-sm text-[var(--color-text-secondary)]" htmlFor="email">
+        Email
+      </label>
+      <input
+        id="email"
+        className="nd-input"
+        autoComplete="username"
+        type="email"
+        value={email}
+        onChange={(event) => setEmail(event.target.value)}
+      />
       <label className="text-sm text-[var(--color-text-secondary)]" htmlFor="password">
         Passwort
       </label>

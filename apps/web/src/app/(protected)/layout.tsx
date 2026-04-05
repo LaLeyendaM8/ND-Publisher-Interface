@@ -1,10 +1,11 @@
 import { redirect } from "next/navigation";
 import { AppNav } from "@/components/app-nav";
 import { LogoutButton } from "@/components/logout-button";
-import { isAuthenticated } from "@/lib/auth";
+import { getCurrentAuth } from "@/lib/auth";
 
 export default async function ProtectedLayout({ children }: { children: React.ReactNode }) {
-  if (!(await isAuthenticated())) {
+  const auth = await getCurrentAuth();
+  if (!auth) {
     redirect("/login");
   }
 
@@ -18,7 +19,9 @@ export default async function ProtectedLayout({ children }: { children: React.Re
           </div>
           <div className="hidden text-right md:block">
             <p className="text-sm text-[var(--color-text-secondary)]">Interne ND Toolchain</p>
-            <p className="text-xs text-[var(--color-text-secondary)]">Phase 4 - UI v1</p>
+            <p className="text-xs text-[var(--color-text-secondary)]">
+              {auth.email ?? "Unbekannt"} - {auth.role}
+            </p>
           </div>
         </div>
       </header>

@@ -1,7 +1,12 @@
 import { NextRequest } from "next/server";
+import { AppRole, getCurrentAuth } from "@/lib/auth";
 
 const BASE_URL = process.env.PUBLISHER_API_URL ?? "http://127.0.0.1:8000";
 const INTERNAL_TOKEN = process.env.PUBLISHER_API_TOKEN ?? "";
+
+function canWrite(role: AppRole) {
+  return role === "admin" || role === "editor";
+}
 
 function joinPath(parts: string[]): string {
   const cleaned = parts.map((p) => encodeURIComponent(p)).join("/");
@@ -9,6 +14,17 @@ function joinPath(parts: string[]): string {
 }
 
 async function proxy(req: NextRequest, method: string, path: string[]) {
+  const auth = await getCurrentAuth();
+  if (!auth) {
+    return Response.json({ ok: false, error: { code: "unauthorized", message: "Login required." } }, { status: 401 });
+  }
+  if (method !== "GET" && !canWrite(auth.role)) {
+    return Response.json(
+      { ok: false, error: { code: "forbidden", message: "Viewer role is read-only." } },
+      { status: 403 },
+    );
+  }
+
   const url = new URL(joinPath(path));
   req.nextUrl.searchParams.forEach((value, key) => url.searchParams.set(key, value));
 
@@ -20,6 +36,9 @@ async function proxy(req: NextRequest, method: string, path: string[]) {
   if (sourceContentType && !sourceContentType.includes("multipart/form-data")) {
     headers.set("Content-Type", sourceContentType);
   }
+  headers.set("X-User-Id", auth.id);
+  headers.set("X-User-Role", auth.role);
+  headers.set("X-User-Email", auth.email ?? "");
 
   let body: BodyInit | undefined;
   if (method !== "GET" && method !== "DELETE") {
