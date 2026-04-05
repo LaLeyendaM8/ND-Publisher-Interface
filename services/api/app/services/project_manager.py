@@ -139,8 +139,17 @@ def _ensure_default_workspace_context() -> tuple[str, str]:
     return workspace_id, user_id
 
 
-def _create_project_db(name: str) -> ProjectView:
-    workspace_id, user_id = _ensure_default_workspace_context()
+def _resolve_workspace_context(workspace_id: str | None, user_id: str | None) -> tuple[str, str]:
+    if workspace_id and user_id:
+        return workspace_id, user_id
+    if workspace_id and not user_id:
+        _, fallback_user_id = _ensure_default_workspace_context()
+        return workspace_id, fallback_user_id
+    return _ensure_default_workspace_context()
+
+
+def _create_project_db(name: str, workspace_id: str | None = None, user_id: str | None = None) -> ProjectView:
+    workspace_id, user_id = _resolve_workspace_context(workspace_id, user_id)
     with db_conn() as conn:
         with conn.cursor() as cur:
             cur.execute(
@@ -169,8 +178,8 @@ def _create_project_db(name: str) -> ProjectView:
     return view
 
 
-def _list_projects_db() -> list[ProjectView]:
-    workspace_id, _ = _ensure_default_workspace_context()
+def _list_projects_db(workspace_id: str | None = None) -> list[ProjectView]:
+    workspace_id, _ = _resolve_workspace_context(workspace_id, None)
     with db_conn() as conn:
         with conn.cursor() as cur:
             cur.execute(
@@ -194,8 +203,8 @@ def _list_projects_db() -> list[ProjectView]:
     ]
 
 
-def _get_project_db(project_id: str) -> ProjectView:
-    workspace_id, _ = _ensure_default_workspace_context()
+def _get_project_db(project_id: str, workspace_id: str | None = None) -> ProjectView:
+    workspace_id, _ = _resolve_workspace_context(workspace_id, None)
     with db_conn() as conn:
         with conn.cursor() as cur:
             cur.execute(
@@ -217,9 +226,14 @@ def _get_project_db(project_id: str) -> ProjectView:
     )
 
 
-def _save_project_file_db(project_id: str, upload: UploadFile) -> ProjectFileView:
-    project = _get_project_db(project_id)
-    workspace_id, user_id = _ensure_default_workspace_context()
+def _save_project_file_db(
+    project_id: str,
+    upload: UploadFile,
+    workspace_id: str | None = None,
+    user_id: str | None = None,
+) -> ProjectFileView:
+    project = _get_project_db(project_id, workspace_id=workspace_id)
+    workspace_id, user_id = _resolve_workspace_context(workspace_id, user_id)
 
     file_id = str(uuid.uuid4())
     filename = _safe_filename(upload.filename or "upload.bin")
@@ -270,8 +284,8 @@ def _save_project_file_db(project_id: str, upload: UploadFile) -> ProjectFileVie
     return view
 
 
-def _list_project_files_db(project_id: str) -> list[ProjectFileView]:
-    _get_project_db(project_id)
+def _list_project_files_db(project_id: str, workspace_id: str | None = None) -> list[ProjectFileView]:
+    _get_project_db(project_id, workspace_id=workspace_id)
     with db_conn() as conn:
         with conn.cursor() as cur:
             cur.execute(
@@ -297,16 +311,18 @@ def _list_project_files_db(project_id: str) -> list[ProjectFileView]:
     ]
 
 
-def _get_file_db(file_id: str) -> ProjectFileView:
+def _get_file_db(file_id: str, workspace_id: str | None = None) -> ProjectFileView:
+    workspace_id, _ = _resolve_workspace_context(workspace_id, None)
     with db_conn() as conn:
         with conn.cursor() as cur:
             cur.execute(
                 """
-                SELECT id, project_id, original_name, size_bytes, storage_path, created_at
-                FROM files
-                WHERE id = %s
+                SELECT f.id, f.project_id, f.original_name, f.size_bytes, f.storage_path, f.created_at
+                FROM files f
+                JOIN projects p ON p.id = f.project_id
+                WHERE f.id = %s AND p.workspace_id = %s
                 """,
-                (file_id,),
+                (file_id, workspace_id),
             )
             row = cur.fetchone()
     if not row:
@@ -321,9 +337,9 @@ def _get_file_db(file_id: str) -> ProjectFileView:
     )
 
 
-def create_project(name: str) -> ProjectView:
+def create_project(name: str, workspace_id: str | None = None, user_id: str | None = None) -> ProjectView:
     if has_database():
-        return _create_project_db(name)
+        return _create_project_db(name, workspace_id=workspace_id, user_id=user_id)
 
     project_id = str(uuid.uuid4())
     project = _InternalProject(project_id=project_id, name=name)
@@ -332,9 +348,9 @@ def create_project(name: str) -> ProjectView:
     return _to_project_view(project)
 
 
-def list_projects() -> list[ProjectView]:
+def list_projects(workspace_id: str | None = None) -> list[ProjectView]:
     if has_database():
-        return _list_projects_db()
+        return _list_projects_db(workspace_id=workspace_id)
 
     with _LOCK:
         projects = list(_PROJECTS.values())
@@ -342,9 +358,9 @@ def list_projects() -> list[ProjectView]:
     return [_to_project_view(p) for p in projects_sorted]
 
 
-def get_project(project_id: str) -> ProjectView:
+def get_project(project_id: str, workspace_id: str | None = None) -> ProjectView:
     if has_database():
-        return _get_project_db(project_id)
+        return _get_project_db(project_id, workspace_id=workspace_id)
 
     with _LOCK:
         project = _PROJECTS.get(project_id)
@@ -353,9 +369,14 @@ def get_project(project_id: str) -> ProjectView:
     return _to_project_view(project)
 
 
-def save_project_file(project_id: str, upload: UploadFile) -> ProjectFileView:
+def save_project_file(
+    project_id: str,
+    upload: UploadFile,
+    workspace_id: str | None = None,
+    user_id: str | None = None,
+) -> ProjectFileView:
     if has_database():
-        return _save_project_file_db(project_id, upload)
+        return _save_project_file_db(project_id, upload, workspace_id=workspace_id, user_id=user_id)
 
     with _LOCK:
         project = _PROJECTS.get(project_id)
@@ -391,9 +412,9 @@ def save_project_file(project_id: str, upload: UploadFile) -> ProjectFileView:
     return _to_file_view(record)
 
 
-def list_project_files(project_id: str) -> list[ProjectFileView]:
+def list_project_files(project_id: str, workspace_id: str | None = None) -> list[ProjectFileView]:
     if has_database():
-        return _list_project_files_db(project_id)
+        return _list_project_files_db(project_id, workspace_id=workspace_id)
 
     with _LOCK:
         files = [f for f in _FILES.values() if f.project_id == project_id]
@@ -401,9 +422,9 @@ def list_project_files(project_id: str) -> list[ProjectFileView]:
     return [_to_file_view(f) for f in files_sorted]
 
 
-def get_file(file_id: str) -> ProjectFileView:
+def get_file(file_id: str, workspace_id: str | None = None) -> ProjectFileView:
     if has_database():
-        return _get_file_db(file_id)
+        return _get_file_db(file_id, workspace_id=workspace_id)
 
     with _LOCK:
         file_rec = _FILES.get(file_id)

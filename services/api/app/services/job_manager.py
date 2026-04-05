@@ -46,7 +46,7 @@ def _is_db_job_candidate(request: RunRequest) -> bool:
     return has_database() and request.project_id is not None
 
 
-def _create_job_db(request: RunRequest) -> JobView:
+def _create_job_db(request: RunRequest, actor_user_id: str | None = None) -> JobView:
     with db_conn() as conn:
         with conn.cursor() as cur:
             cur.execute("SELECT workspace_id FROM projects WHERE id = %s", (request.project_id,))
@@ -58,8 +58,8 @@ def _create_job_db(request: RunRequest) -> JobView:
             job_id = str(uuid.uuid4())
             cur.execute(
                 """
-                INSERT INTO jobs (id, workspace_id, project_id, file_id, tool, status, options, message)
-                VALUES (%s, %s, %s, %s, %s, 'queued', %s::jsonb, '')
+                INSERT INTO jobs (id, workspace_id, project_id, file_id, tool, status, options, message, created_by)
+                VALUES (%s, %s, %s, %s, %s, 'queued', %s::jsonb, '', %s)
                 RETURNING id, project_id, file_id, tool, status, options, message, queued_at
                 """,
                 (
@@ -69,6 +69,7 @@ def _create_job_db(request: RunRequest) -> JobView:
                     request.file_id,
                     request.tool,
                     json.dumps(request.options),
+                    actor_user_id,
                 ),
             )
             row = cur.fetchone()
@@ -88,7 +89,7 @@ def _create_job_db(request: RunRequest) -> JobView:
     )
     log_audit_event(
         workspace_id=workspace_id,
-        actor_user_id=None,
+        actor_user_id=actor_user_id,
         event_name="job.queued",
         entity_type="job",
         entity_id=view.job_id,
@@ -101,10 +102,10 @@ def _create_job_db(request: RunRequest) -> JobView:
     return view
 
 
-def create_job(request: RunRequest) -> JobView:
+def create_job(request: RunRequest, actor_user_id: str | None = None) -> JobView:
     if _is_db_job_candidate(request):
         logger.info("Job queued in DB for project=%s tool=%s", request.project_id, request.tool)
-        return _create_job_db(request)
+        return _create_job_db(request, actor_user_id=actor_user_id)
 
     job_id = uuid.uuid4().hex
     job = _InternalJob(job_id=job_id, request=request)
@@ -197,7 +198,7 @@ def list_jobs() -> list[JobView]:
     return items
 
 
-def list_jobs_for_project(project_id: str) -> list[JobView]:
+def list_jobs_for_project(project_id: str, workspace_id: str | None = None) -> list[JobView]:
     if has_database():
         with db_conn() as conn:
             with conn.cursor() as cur:
@@ -206,10 +207,10 @@ def list_jobs_for_project(project_id: str) -> list[JobView]:
                     SELECT id, project_id, file_id, tool, status, options, message, queued_at,
                            COALESCE(finished_at, started_at, queued_at) AS updated_at
                     FROM jobs
-                    WHERE project_id = %s
+                    WHERE project_id = %s AND (%s::uuid IS NULL OR workspace_id = %s::uuid)
                     ORDER BY queued_at DESC
                     """,
-                    (project_id,),
+                    (project_id, workspace_id, workspace_id),
                 )
                 rows = cur.fetchall()
         return [_job_view_from_row(r) for r in rows]

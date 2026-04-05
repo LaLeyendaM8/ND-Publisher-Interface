@@ -52,6 +52,11 @@ Notes:
 - On business/runtime errors the endpoint returns a `JobResult` with `status: "failed"` and an error `message`.
 - For async jobs, poll `GET /tools/jobs/{job_id}` and read `status` (`queued|running|done|failed`).
 - If `APP_INTERNAL_API_TOKEN` is set, send header `X-Internal-Token: <token>` on protected endpoints.
+- If requests come from web login, forward actor headers:
+  - `X-User-Id`
+  - `X-User-Email`
+  - `X-User-Role` (`admin|editor|viewer`)
+- `AUTH_AUTO_PROVISION_USERS=true` auto-creates workspace membership for new actor users.
 - API errors are standardized as:
   - `{ "ok": false, "error": { "code": "...", "message": "...", "details": ... } }`
 

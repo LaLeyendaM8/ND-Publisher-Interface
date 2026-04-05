@@ -50,7 +50,7 @@ def enqueue_tool_job(
         output_dir=Path(payload.output_dir),
         options=payload.options,
     )
-    job = create_job(request)
+    job = create_job(request, actor_user_id=None)
     background_tasks.add_task(run_job, job.job_id)
     return job
 

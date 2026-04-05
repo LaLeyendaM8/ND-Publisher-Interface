@@ -17,6 +17,7 @@ class Settings:
     storage_root: str
     database_url: str | None
     supabase_service_role_key: str | None
+    auth_auto_provision_users: bool
     retention_artifact_days: int
     retention_failed_job_days: int
     retention_audit_days: int
@@ -34,6 +35,7 @@ def get_settings() -> Settings:
         storage_root=os.getenv("APP_STORAGE_ROOT", str(API_ROOT / "data")),
         database_url=os.getenv("DATABASE_URL"),
         supabase_service_role_key=os.getenv("SUPABASE_SERVICE_ROLE_KEY"),
+        auth_auto_provision_users=os.getenv("AUTH_AUTO_PROVISION_USERS", "true").lower() in {"1", "true", "yes"},
         retention_artifact_days=int(os.getenv("RETENTION_ARTIFACT_DAYS", "180")),
         retention_failed_job_days=int(os.getenv("RETENTION_FAILED_JOB_DAYS", "30")),
         retention_audit_days=int(os.getenv("RETENTION_AUDIT_DAYS", "365")),

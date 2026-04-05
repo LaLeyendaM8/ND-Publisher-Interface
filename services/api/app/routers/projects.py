@@ -5,7 +5,7 @@ from fastapi import APIRouter, BackgroundTasks, Depends, File, HTTPException, Up
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
-from app.core.auth import require_internal_token
+from app.core.actor import RequestActor, require_actor
 from app.core.schemas import JobView, ToolId
 from app.services.job_manager import create_job, get_job_artifact, get_project_job, list_jobs_for_project, run_job
 from app.services.project_manager import (
@@ -21,7 +21,7 @@ from app.services.project_manager import (
 from app.services.runner import RunRequest
 
 
-router = APIRouter(prefix="/projects", tags=["projects"], dependencies=[Depends(require_internal_token)])
+router = APIRouter(prefix="/projects", tags=["projects"])
 
 
 class ProjectCreatePayload(BaseModel):
@@ -35,48 +35,56 @@ class ProjectRunPayload(BaseModel):
 
 
 @router.post("")
-def create_project_now(payload: ProjectCreatePayload) -> ProjectView:
-    return create_project(payload.name.strip())
+def create_project_now(payload: ProjectCreatePayload, actor: RequestActor = Depends(require_actor)) -> ProjectView:
+    if not actor.can_write:
+        raise HTTPException(status_code=403, detail="Viewer role is read-only.")
+    return create_project(payload.name.strip(), workspace_id=actor.workspace_id, user_id=actor.user_id)
 
 
 @router.get("")
-def list_projects_now() -> dict[str, list[ProjectView]]:
-    return {"projects": list_projects()}
+def list_projects_now(actor: RequestActor = Depends(require_actor)) -> dict[str, list[ProjectView]]:
+    return {"projects": list_projects(workspace_id=actor.workspace_id)}
 
 
 @router.get("/{project_id}")
-def get_project_now(project_id: str) -> ProjectView:
+def get_project_now(project_id: str, actor: RequestActor = Depends(require_actor)) -> ProjectView:
     try:
-        return get_project(project_id)
+        return get_project(project_id, workspace_id=actor.workspace_id)
     except KeyError as exc:
         raise HTTPException(status_code=404, detail=f"Project not found: {project_id}") from exc
 
 
 @router.post("/{project_id}/files")
-def upload_project_file(project_id: str, file: UploadFile = File(...)) -> ProjectFileView:
+def upload_project_file(
+    project_id: str,
+    file: UploadFile = File(...),
+    actor: RequestActor = Depends(require_actor),
+) -> ProjectFileView:
+    if not actor.can_write:
+        raise HTTPException(status_code=403, detail="Viewer role is read-only.")
     try:
-        return save_project_file(project_id, file)
+        return save_project_file(project_id, file, workspace_id=actor.workspace_id, user_id=actor.user_id)
     except KeyError as exc:
         raise HTTPException(status_code=404, detail=f"Project not found: {project_id}") from exc
 
 
 @router.get("/{project_id}/files")
-def list_files(project_id: str) -> dict[str, list[ProjectFileView]]:
+def list_files(project_id: str, actor: RequestActor = Depends(require_actor)) -> dict[str, list[ProjectFileView]]:
     try:
-        get_project(project_id)
+        get_project(project_id, workspace_id=actor.workspace_id)
     except KeyError as exc:
         raise HTTPException(status_code=404, detail=f"Project not found: {project_id}") from exc
-    return {"files": list_project_files(project_id)}
+    return {"files": list_project_files(project_id, workspace_id=actor.workspace_id)}
 
 
 @router.get("/{project_id}/files/{file_id}")
-def get_project_file(project_id: str, file_id: str) -> ProjectFileView:
+def get_project_file(project_id: str, file_id: str, actor: RequestActor = Depends(require_actor)) -> ProjectFileView:
     try:
-        get_project(project_id)
+        get_project(project_id, workspace_id=actor.workspace_id)
     except KeyError as exc:
         raise HTTPException(status_code=404, detail=f"Project not found: {project_id}") from exc
     try:
-        file_view = get_file(file_id)
+        file_view = get_file(file_id, workspace_id=actor.workspace_id)
     except KeyError as exc:
         raise HTTPException(status_code=404, detail=f"File not found: {file_id}") from exc
     if file_view.project_id != project_id:
@@ -85,8 +93,8 @@ def get_project_file(project_id: str, file_id: str) -> ProjectFileView:
 
 
 @router.get("/{project_id}/files/{file_id}/download")
-def download_project_file(project_id: str, file_id: str) -> FileResponse:
-    file_view = get_project_file(project_id, file_id)
+def download_project_file(project_id: str, file_id: str, actor: RequestActor = Depends(require_actor)) -> FileResponse:
+    file_view = get_project_file(project_id, file_id, actor)
     path = Path(file_view.stored_path)
     if not path.exists() or not path.is_file():
         raise HTTPException(status_code=404, detail=f"Stored file missing: {file_view.stored_path}")
@@ -94,14 +102,21 @@ def download_project_file(project_id: str, file_id: str) -> FileResponse:
 
 
 @router.post("/{project_id}/jobs")
-def run_project_job(project_id: str, payload: ProjectRunPayload, background_tasks: BackgroundTasks) -> JobView:
+def run_project_job(
+    project_id: str,
+    payload: ProjectRunPayload,
+    background_tasks: BackgroundTasks,
+    actor: RequestActor = Depends(require_actor),
+) -> JobView:
+    if not actor.can_write:
+        raise HTTPException(status_code=403, detail="Viewer role is read-only.")
     try:
-        get_project(project_id)
+        get_project(project_id, workspace_id=actor.workspace_id)
     except KeyError as exc:
         raise HTTPException(status_code=404, detail=f"Project not found: {project_id}") from exc
 
     try:
-        file_view = get_file(payload.file_id)
+        file_view = get_file(payload.file_id, workspace_id=actor.workspace_id)
     except KeyError as exc:
         raise HTTPException(status_code=404, detail=f"File not found: {payload.file_id}") from exc
     if file_view.project_id != project_id:
@@ -116,24 +131,24 @@ def run_project_job(project_id: str, payload: ProjectRunPayload, background_task
         project_id=project_id,
         file_id=payload.file_id,
     )
-    job = create_job(request)
+    job = create_job(request, actor_user_id=actor.user_id)
     background_tasks.add_task(run_job, job.job_id)
     return job
 
 
 @router.get("/{project_id}/jobs")
-def list_project_jobs(project_id: str) -> dict[str, list[JobView]]:
+def list_project_jobs(project_id: str, actor: RequestActor = Depends(require_actor)) -> dict[str, list[JobView]]:
     try:
-        get_project(project_id)
+        get_project(project_id, workspace_id=actor.workspace_id)
     except KeyError as exc:
         raise HTTPException(status_code=404, detail=f"Project not found: {project_id}") from exc
-    return {"jobs": list_jobs_for_project(project_id)}
+    return {"jobs": list_jobs_for_project(project_id, workspace_id=actor.workspace_id)}
 
 
 @router.get("/{project_id}/jobs/{job_id}")
-def get_project_job_view(project_id: str, job_id: str) -> JobView:
+def get_project_job_view(project_id: str, job_id: str, actor: RequestActor = Depends(require_actor)) -> JobView:
     try:
-        get_project(project_id)
+        get_project(project_id, workspace_id=actor.workspace_id)
     except KeyError as exc:
         raise HTTPException(status_code=404, detail=f"Project not found: {project_id}") from exc
     try:
@@ -143,8 +158,14 @@ def get_project_job_view(project_id: str, job_id: str) -> JobView:
 
 
 @router.get("/{project_id}/jobs/{job_id}/artifacts/{artifact_index}")
-def download_project_job_artifact(project_id: str, job_id: str, artifact_index: int) -> FileResponse:
+def download_project_job_artifact(
+    project_id: str,
+    job_id: str,
+    artifact_index: int,
+    actor: RequestActor = Depends(require_actor),
+) -> FileResponse:
     try:
+        get_project(project_id, workspace_id=actor.workspace_id)
         get_project_job(project_id, job_id)
     except KeyError as exc:
         raise HTTPException(status_code=404, detail=f"Job not found for project: {job_id}") from exc
