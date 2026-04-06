@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { clearSessionCookies, signInWithPasswordServer } from "@/lib/auth";
+import { signInWithPasswordServer } from "@/lib/auth";
 
 async function syncActorProvisioning(auth: { id: string; email: string | null; role: string }) {
   const baseUrl = process.env.PUBLISHER_API_URL?.replace(/\/+$/, "");
@@ -42,14 +42,12 @@ export async function POST(req: Request) {
     );
   }
 
+  // Provisioning is best-effort; login should still succeed even if API sync
+  // is temporarily unavailable (deploy lag, token mismatch, cold start).
   try {
     await syncActorProvisioning(auth);
   } catch {
-    await clearSessionCookies();
-    return NextResponse.json(
-      { ok: false, error: { code: "provisioning_failed", message: "Login provisioning failed." } },
-      { status: 503 },
-    );
+    // no-op
   }
 
   return NextResponse.json({ ok: true, role: auth.role, email: auth.email });
