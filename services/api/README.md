@@ -25,6 +25,7 @@ docker run --rm -p 8000:8000 --env-file .env nd-publisher-api
 ## Endpoints
 
 - `GET /health`
+- `GET /auth/sync` (provisions/loads user + workspace membership from forwarded actor headers)
 - `GET /tools`
 - `POST /tools/run`
 - `POST /tools/jobs` (enqueue async job)

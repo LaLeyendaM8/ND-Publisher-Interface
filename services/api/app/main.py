@@ -5,6 +5,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
 from app.core.responses import error_response
+from app.routers.auth import router as auth_router
 from app.routers.projects import router as projects_router
 from app.routers.health import router as health_router
 from app.routers.tools import router as tools_router
@@ -22,6 +23,7 @@ app = FastAPI(
 )
 
 app.include_router(health_router)
+app.include_router(auth_router)
 app.include_router(tools_router, prefix="/tools", tags=["tools"])
 app.include_router(projects_router)
 
